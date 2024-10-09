@@ -1,0 +1,31 @@
+PLINK v1.90b6.13 64-bit (30 Nov 2019)
+Options in effect:
+  --bfile /Users/jfibla/Library/CloudStorage/Dropbox/JOINING_GENPIR/popShiny/REFERENCE/Merged_FULL_SET_hg38_hgdp.wgs_10000G3_ko07_MAF0.01_pruned_new
+  --make-bed
+  --out /Users/jfibla/Library/CloudStorage/Dropbox/JOINING_GENPIR/popShiny/REFERENCE/Reference
+  --remove /Users/jfibla/Library/CloudStorage/Dropbox/JOINING_GENPIR/popShiny/REFERENCE/to_be_removed_ind.txt
+
+Hostname: iMac-de-Joan.local
+Working directory: /Users/jfibla/Library/CloudStorage/Dropbox/JOINING_GENPIR/popShiny
+Start time: Tue Oct  8 16:10:43 2024
+
+Random number seed: 1728396643
+8192 MB RAM detected; reserving 4096 MB for main workspace.
+1323428 variants loaded from .bim file.
+3269 people (1750 males, 1519 females) loaded from .fam.
+--remove: 3258 people remaining.
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 3258 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate in remaining samples is 0.992135.
+1323428 variants and 3258 people pass filters and QC.
+Note: No phenotypes present.
+--make-bed to
+/Users/jfibla/Library/CloudStorage/Dropbox/JOINING_GENPIR/popShiny/REFERENCE/Reference.bed
++
+/Users/jfibla/Library/CloudStorage/Dropbox/JOINING_GENPIR/popShiny/REFERENCE/Reference.bim
++
+/Users/jfibla/Library/CloudStorage/Dropbox/JOINING_GENPIR/popShiny/REFERENCE/Reference.fam
+... done.
+
+End time: Tue Oct  8 16:10:47 2024

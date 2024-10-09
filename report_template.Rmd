@@ -1,0 +1,31 @@
+---
+title: "Analysis Report"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: html_document
+params:
+  pca_plot: NULL
+  admixture_plot: NULL
+  box_ADM: NULL  
+  map_ADM: NULL
+  manhattan_plot: NULL
+---
+
+# Analysis Summary
+This report summarizes the results of the genetic analysis pipeline, including PCA, FST Manhattan, and ADMIXTURE plots.
+
+## Resume plots
+```{r, echo=FALSE, fig.cap="The Principal Component Analysis (PCA) provides a visualization of genetic variation between populations or samples. The plot below represents the first two principal components"}
+knitr::include_graphics(params$pca_plot)
+## Admixture Plot
+```{r, echo=FALSE, fig.cap="Admixture Plot"}
+knitr::include_graphics(params$admixture_plot)
+## Admixture boxplot
+```{r, echo=FALSE, fig.cap="box_ADM"}
+knitr::include_graphics(params$box_ADM)
+## Admixture mapplot
+```{r, echo=FALSE, fig.cap="map_ADM"}
+knitr::include_graphics(params$map_ADM)
+## FST Plot
+```{r, echo=FALSE, fig.cap="FST Plot"}
+knitr::include_graphics(params$manhattan_plot)

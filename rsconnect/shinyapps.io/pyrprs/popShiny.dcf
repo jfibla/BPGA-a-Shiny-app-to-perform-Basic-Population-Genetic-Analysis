@@ -1,0 +1,12 @@
+name: popShiny
+title: popShiny
+username: pyrprs
+account: pyrprs
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12751104
+bundleId: 9119035
+url: https://pyrprs.shinyapps.io/popShiny/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
