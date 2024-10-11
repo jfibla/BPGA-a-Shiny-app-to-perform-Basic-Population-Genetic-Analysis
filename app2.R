@@ -20,7 +20,9 @@ ui <- fluidPage(
   titlePanel("Basic Population Genetic Analysis - (BPGA)"),
   sidebarLayout(
     sidebarPanel(
-      actionButton("remove", "Remove previous files"),
+    #  actionButton("remove", "Remove previous files"),
+      actionButton("reset_all", "Reset All"),
+      actionButton("reset_session", "Reset session files"),
       selectInput("files", "Select input file:",
                   c("Example file" = "exp",
                     "User file" = "usr")),
@@ -28,9 +30,10 @@ ui <- fluidPage(
         condition = "input.files == 'usr'",
       fileInput("upload_file", "Load user population data (compressed .zip or .gz)", 
                 accept = c(".zip", ".gz")),
-      textInput("popID", "Assign population identifier (use a three-letter code like 'USR')", "USR")
+      textInput("popID", "Assign population identifier (use a three-letter code like 'USR')", "USR"),
+      textInput("lat", "Assign latitude"),
+      textInput("lon", "Assign longitude")
       ),
-      
       h4("Process input File"),
       radioButtons("selector", "Select option:", 
               choices = list("Merge with Woldwide populations" = "wwp","Only loaded population" = "usr")),
@@ -55,7 +58,8 @@ ui <- fluidPage(
       radioButtons("popcolor", "Colored:", 
                    choices = list("Superpopulation" = "SUP", "Subpopulation" = "POP")),
       sliderInput("sliderR", "Set Pie radius:", min = 0, max = 10, value = 4, step = 0.5),
-       uiOutput("sorter"),
+      sliderInput("sliderE", "Expand map:", min = 0, max = 2, value = 0.2, step = 0.05),
+      uiOutput("sorter"),
       #selectInput("sorter", "Sort admixture plot:",
       #                 c("By first component" = "V1",
       #                   "By second component" = "V2")),
@@ -65,6 +69,7 @@ ui <- fluidPage(
       uiOutput("pop2_checkbox"),  # Dynamic Checkbox for POP2
       shinyjs::hidden(actionButton("select_all_pop2", "Remove selected")),
       actionButton("run_fst", "Run FST analysis"),
+      
       h4("Report"),
       downloadButton("downloadReport", "Download Report")
     ),
@@ -74,7 +79,7 @@ ui <- fluidPage(
       plotOutput("PCA_plot"),
       plotOutput("ADMIXTURE_plot"),
       plotOutput("box_plot"), 
-      plotOutput("map_plot", height = "800px"),
+      plotOutput("map_plot", height = "700px"),
       plotOutput("manhattan_plot")
     )
   )
@@ -82,28 +87,37 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   processed_file_path <- reactiveVal(NULL)  # Store processed file path
-  
+  # Disable the PCA, ADMIXTURE, and FST buttons by default
+  shinyjs::disable("run_plink")
+  shinyjs::disable("run_admix")
+  shinyjs::disable("run_fst")
+################################################################################  
   # Function to decompress and label the uploaded file
   observeEvent(input$process_file, {
- 
-    if (input$files == "exp"){                   ############### if the example file is selected
+    
+    # Ensure only one progress object is created at the start
     progress <- shiny::Progress$new()
     progress$set(message = "Processing file...", value = 0)
-    on.exit(progress$close())
+    on.exit({
+      progress$close()  # Ensure progress bar is closed at the end of processing
+    }, add = TRUE)
     
+    if (input$selector == "usr") {
+      shinyjs::enable("run_plink")
+    }
+
+    if (input$files == "exp"){                   ############### if the example file is selected
+ 
     # go to folder with the example file
     file_path <- "example/example.zip"
     file_ext <- tools::file_ext(file_path)
     base_name <- "example"
  
     if(input$selector == "wwp") {                 ####### if example file is merged with WWW
-      progress <- shiny::Progress$new()
-      progress$set(message = "Processing file...", value = 0)
-      on.exit(progress$close())
-      
+
     unzip(file_path, exdir = "decompressed_files") #>>>>>> send to "decompressed_files" folder
     decompressed_file_path <- paste0("decompressed_files/", base_name)
-
+    # Store the processed file path
     processed_file_path(decompressed_file_path)
 
     # rename files as INPUT mantenint l'extensió original
@@ -143,17 +157,11 @@ server <- function(input, output, session) {
       pop2_choices <- df2[df2$POP1 == input$pop1, "POP2"]
       selectInput("pop2", "Select a pair of Subpopulations: (FST analysis)", choices = unique(pop2_choices), multiple = TRUE)
     })
+ 
+    # Update status to indicate file processed successfully
     output$status <- renderText("File processed successfully.")
-    on.exit(progress$close())  # Ensure progress bar closes on exit
-    progress$inc(1) 
-    # If the merge is successful, set the flag to TRUE
-    
     
     } else {                                  ####### if example file is processed alone
-     
-      progress <- shiny::Progress$new()
-      progress$set(message = "Processing file...", value = 0)
-      on.exit(progress$close())
       
       unzip(file_path, exdir = "temporal")   #>>>>>>> send to "temporal" folder
       temporal_file_path <- paste0("temporal/", base_name)
@@ -198,17 +206,14 @@ server <- function(input, output, session) {
         pop2_choices <- df2[df2$POP1 == input$pop1, "POP2"]
         selectInput("pop2", "Select a pair of Subpopulations: (FST analysis)", choices = unique(pop2_choices), multiple = TRUE)
       })
-      output$status <- renderText("File processed successfully.")
-      on.exit(progress$close())  # Ensure progress bar closes on exit
-      progress$inc(1) 
     }
+    # File processed successfully
+    output$status <- renderText("File processed successfully.")
+#    progress$inc(1)  # Increment progress
     
     } else {                                 ################ selection of file loaded by the user file
     req(input$upload_file)
-    progress <- shiny::Progress$new()
-    progress$set(message = "Processing file...", value = 0)
-    on.exit(progress$close())
-    
+
     file_path <- input$upload_file$datapath
     file_ext <- tools::file_ext(file_path)
     
@@ -304,12 +309,12 @@ server <- function(input, output, session) {
         # checkboxGroupInput("pop2", "Select POP2 Groups:", choices = unique(pop2_choices))
       })
     }
+    # Final step - Update status and progress bar
     output$status <- renderText("File processed successfully.")
-    on.exit(progress$close())  # Ensure progress bar closes on exit
-    progress$inc(1) 
+    progress$inc(1)  # Ensure progress is fully completed 
     }
   })
-  
+###############################################################################  
   # Function to merge files
   observeEvent(input$run_merge, {
   #  req(input$upload_file)  # Ensure the file is uploaded before proceeding  
@@ -389,6 +394,8 @@ server <- function(input, output, session) {
       selectInput("pop2", "Select a pair of Subpopulations: (FST analysis)", choices = unique(pop2_choices), multiple = TRUE)
      # checkboxGroupInput("pop2", "Select POP2 Groups:", choices = unique(pop2_choices))
     }) 
+    shinyjs::enable("run_plink")
+    showNotification("Files merged successfully! You can now perform PCA analyses by selecting target populations.", type = "message", duration = 10)
   })
   
   # Executar PLINK quan es fa clic al botó
@@ -412,7 +419,7 @@ server <- function(input, output, session) {
     # Comprovar que els fitxers necessaris existeixen
     required_files <- paste0(bfile_path, c(".bed", ".bim", ".fam"))
     if (!all(file.exists(required_files))) {
-      showNotification("Missing required PLINK files (.bed, .bim, .fam).", type = "error")
+      showNotification("Missing required PLINK files (.bed, .bim, .fam).", type = "error", duration = 10)
       return(NULL)
     }
     
@@ -458,9 +465,10 @@ server <- function(input, output, session) {
       system(paste("www/plink19 --bfile PCA/step3 --pca 10 header tabs var-wts --out PCA/input_PCA"))
       update_progress(0.20)  # Update progress to 100%
       
-      output$status <- renderText("PLINK analysis completed successfully.")
+      output$status <- renderText("PCA analysis completed successfully.")
+
     }, error = function(e) {
-      showNotification("PLINK analysis failed. Check the logs.", type = "error")
+      showNotification("PLINK analysis failed. Check the logs.", type = "error", duration = 10)
       output$status <- renderText(paste("Error:", e$message))
     })
     
@@ -469,24 +477,41 @@ server <- function(input, output, session) {
     # Read the PCA results from the PLINK output file
     PCA_results <- fread("PCA/input_PCA.eigenvec", header = TRUE)
     
+    
     # Render the PCA plot
     output$PCA_plot <- renderPlot({
       to_color <- fread("temporal/to_color.txt", header = F)
       colnames(to_color) <- c("POP1", "POP2")
+      
+      # Get unique items in the order they first appear
+      unique_names <- unique(unique(to_color$POP1))
+      # Reorder the Name column based on unique values
+      to_color$POP1 <- factor(to_color$POP1, levels = unique_names)
+      # Get unique items in the order they first appear
+      unique_names2 <- unique(unique(to_color$POP2))
+      # Reorder the Name column based on unique values
+      to_color$POP2 <- factor(to_color$POP2, levels = unique_names2)
+      
       if (input$popcolor == "SUP") {
-        PCA <- ggplot(PCA_results, aes(x = PC1, y = PC2, color = to_color$POP1)) +
-          geom_point(size = 2, shape = 23) +
+        PCA <- ggplot(PCA_results, aes(x = PC1, y = PC2, color = factor(to_color$POP1))) +
+          geom_point(size = 3, shape=1, stroke = 1.5) +
           labs(title = "PCA Plot", x = "PC1", y = "PC2") +
           guides(color = guide_legend(title = "Superpopulation")) 
       } else if (input$popcolor == "POP") {
-        PCA <-  ggplot(PCA_results, aes(x = PC1, y = PC2, color = to_color$POP2)) +
-          geom_point(size = 2, shape = 23) +
+        PCA <-  ggplot(PCA_results, aes(x = PC1, y = PC2, color = factor(to_color$POP2), shape = factor(to_color$POP1))) +
+          geom_point(size = 3, stroke = 1.5) +
           labs(title = "PCA Plot", x = "PC1", y = "PC2") +
-          guides(color = guide_legend(title = "Subpopulation")) 
+          guides(color = guide_legend(title = "Subpopulation"),
+          shape = guide_legend(title = "Superpulation")) 
       }
       plot(PCA)
       ggsave("plots/PCA.png")
     })
+    
+    shinyjs::enable("run_admix")
+    shinyjs::enable("run_fst")
+    showNotification("PCA analysis finished. You can now run ADMIXTURE or FST analysis.", type = "message", duration = 10)
+    
   })  
 
   ###########################################
@@ -629,13 +654,20 @@ server <- function(input, output, session) {
       # Save the plot as PNG
       ggsave("plots/box_ADM.png", plot = p)
       })
-      
+################################################################################      
       output$map_plot <- renderPlot({
         # Load data
         runs <- fread(paste0("input_admx.", input$sliderK, ".Q"))
         to_color <- fread("temporal/to_color.txt", header = FALSE)
         colnames(to_color) <- c("POP1", "POP2")
         coord <- fread(paste0("www/coord.txt"), header = TRUE)
+        
+        if (input$files == "usr") {
+          user_data <-  data.frame(POP1 = input$popID,POP2 = input$popID, Pop_name = "user population", LAT = as.numeric(input$lat),LON = as.numeric(input$lon))
+          coord <- rbind(coord,user_data)
+        } else {
+          coord < coord
+        }
         
         pop_counts <-to_color %>% 
           count(POP2)
@@ -646,10 +678,10 @@ server <- function(input, output, session) {
         # Combine population and ancestry data
         admixture_data <- cbind(to_color, runs)
         admixture_data <- merge(admixture_data, coord, by = c("POP1", "POP2"))
-        
+       
         admixture_data <- admixture_data %>%
           relocate(c(Pop_name, LAT, LON), .before = V1)
-        
+
         cordi <- select(admixture_data, c("POP1", "POP2", "LAT", "LON"))
         
         Npop <- length(unique(admixture_data$POP2))
@@ -668,17 +700,18 @@ server <- function(input, output, session) {
           coord_pop[i, ] <- apply(cordi[pop_subset, c("LON", "LAT")], 2, mean)
         }
         
+        
         # Expand x and y limits by 20%
         xlim <- c(
-          min(coord_pop[, 1]) - 0.2 * (max(coord_pop[, 1]) - min(coord_pop[, 1])), 
-          max(coord_pop[, 1]) + 0.2 * (max(coord_pop[, 1]) - min(coord_pop[, 1]))
+          min(coord_pop[, 1]) - input$sliderE * (max(coord_pop[, 1]) - min(coord_pop[, 1])), 
+          max(coord_pop[, 1]) + input$sliderE * (max(coord_pop[, 1]) - min(coord_pop[, 1]))
         )
         ylim <- c(
-          min(coord_pop[, 2]) - 0.2 * (max(coord_pop[, 2]) - min(coord_pop[, 2])), 
-          max(coord_pop[, 2]) + 0.2 * (max(coord_pop[, 2]) - min(coord_pop[, 2]))
+          min(coord_pop[, 2]) - input$sliderE * (max(coord_pop[, 2]) - min(coord_pop[, 2])), 
+          max(coord_pop[, 2]) + input$sliderE * (max(coord_pop[, 2]) - min(coord_pop[, 2]))
         )
-        
-        # Create base map with adjusted limits
+
+                # Create base map with adjusted limits
         basemap(xlim, ylim)
         plot(coord_pop, xlab = "LON", ylab = "LAT", type = "n", xlim = xlim, ylim = ylim)
         map(add = TRUE, col = "grey90", fill = TRUE)
@@ -699,7 +732,7 @@ server <- function(input, output, session) {
           add.pie(z = qpop[i, ], x = coord_pop[i, 1], y = coord_pop[i, 2], labels = "", 
                   radius = scaled_radius, col = rainbow(input$sliderK))
         }
-        # save plot as png
+############################## save plot as png ##################################
         lon_range <- max(coord_pop[, 1]) - min(coord_pop[, 1])
         lat_range <- max(coord_pop[, 2]) - min(coord_pop[, 2])
         aspect_ratio <- lon_range / lat_range
@@ -712,6 +745,13 @@ server <- function(input, output, session) {
         to_color <- fread("temporal/to_color.txt", header = FALSE)
         colnames(to_color) <- c("POP1", "POP2")
         coord <- fread(paste0("www/coord.txt"), header = TRUE)
+        
+        if (input$files == "usr") {
+          user_data <-  data.frame(POP1 = input$popID,POP2 = input$popID, Pop_name = "user population", LAT = as.numeric(input$lat),LON = as.numeric(input$lon))
+          coord <- rbind(coord,user_data)
+        } else {
+          coord < coord
+        }
         
         pop_counts <-to_color %>% 
           count(POP2)
@@ -753,7 +793,8 @@ server <- function(input, output, session) {
           min(coord_pop[, 2]) - 0.2 * (max(coord_pop[, 2]) - min(coord_pop[, 2])), 
           max(coord_pop[, 2]) + 0.2 * (max(coord_pop[, 2]) - min(coord_pop[, 2]))
         )
-        
+        print(admixture_data)
+        print(coord_pop)
         # Create base map with adjusted limits
         basemap(xlim, ylim)
         plot(coord_pop, xlab = "LON", ylab = "LAT", type = "n", xlim = xlim, ylim = ylim)
@@ -858,8 +899,70 @@ server <- function(input, output, session) {
   })
   ###########################################
   ###########################################
-  observeEvent(input$remove, {
-    # Remove previous files in specified directories
+#  observeEvent(input$remove, {
+#    # Remove previous files in specified directories
+#    unlink("temporal/*", recursive = TRUE)
+#    unlink("temporal/*.log", recursive = TRUE)
+#    
+#    unlink("PCA/*", recursive = TRUE)
+#    unlink("decompressed_files/*.bim", recursive = TRUE)
+#    unlink("decompressed_files/*.fam", recursive = TRUE)
+#    unlink("decompressed_files/*.bed", recursive = TRUE)
+#    #if exist
+#    unlink("1")
+#    unlink("2")
+#    unlink("3")
+#    unlink("4")
+#    unlink("5")
+#    unlink("6")
+#    unlink("7")
+#    unlink("8")
+#    unlink("9")
+#    unlink("10")
+#    unlink("log")
+#    
+#    unlink("ADM/*.Q")
+#    unlink("ADM/*.P")
+#    unlink("*.Q")
+#    unlink("*.P")
+#    unlink("log*")
+#    unlink(paste0("log", input$sliderK, ".out"))
+#    unlink(input$sliderK)
+#    unlink("FST/FST_output.log")
+#    unlink("FST/FST_output.fst")
+#    unlink("plots/PCA.png")
+#    unlink("plots/FST.png")
+#    unlink("plots/ADM.png")
+#    unlink("plots/box_ADM.png")
+#    unlink("plots/map_ADM.png")
+#    
+#   # unlink(temp_folder, recursive = TRUE)
+#    
+#    # Update status to indicate removal is complete
+#    output$status <- renderText("Previous files removed.")
+#  })
+  ###########################################
+  
+  observeEvent(input$reset_all, {
+    # Reset all inputs
+    shinyjs::reset("files")
+    shinyjs::reset("upload_file")
+    shinyjs::reset("sliderK")
+    shinyjs::reset("sliderM")
+    shinyjs::reset("sliderR")
+    shinyjs::reset("popID")
+    shinyjs::reset("lat")
+    shinyjs::reset("lon")
+    
+    # Reset plot outputs
+    output$PCA_plot <- renderPlot(NULL)
+    output$ADMIXTURE_plot <- renderPlot(NULL)
+    output$box_plot <- renderPlot(NULL)
+    output$map_plot <- renderPlot(NULL)
+    output$manhattan_plot <- renderPlot(NULL)
+    
+    # Optionally, reset status text or other outputs
+    output$status <- renderText("All inputs and plots have been reset.")
     unlink("temporal/*", recursive = TRUE)
     unlink("temporal/*.log", recursive = TRUE)
     
@@ -895,14 +998,69 @@ server <- function(input, output, session) {
     unlink("plots/box_ADM.png")
     unlink("plots/map_ADM.png")
     
-   # unlink(temp_folder, recursive = TRUE)
-    
-    # Update status to indicate removal is complete
-    output$status <- renderText("Previous files removed.")
+    # Hide progress bar if needed
+    output$progress_bar_ui <- renderUI(NULL)
   })
-  ###########################################
   
-  
+  observeEvent(input$reset_session, {
+    # Reset only session files
+   # shinyjs::reset("files")
+   # shinyjs::reset("upload_file")
+    shinyjs::reset("sliderK")
+    shinyjs::reset("sliderM")
+    shinyjs::reset("sliderR")
+    shinyjs::reset("popID")
+    shinyjs::reset("lat")
+    shinyjs::reset("lon")
+    
+    # Reset plot outputs
+    output$PCA_plot <- renderPlot(NULL)
+    output$ADMIXTURE_plot <- renderPlot(NULL)
+    output$box_plot <- renderPlot(NULL)
+    output$map_plot <- renderPlot(NULL)
+    output$manhattan_plot <- renderPlot(NULL)
+    
+    # Optionally, reset status text or other outputs
+    output$status <- renderText("All inputs and plots on this session have been reset.")
+   # unlink("temporal/*", recursive = TRUE)
+   # unlink("temporal/*.log", recursive = TRUE)
+    
+    unlink("PCA/*", recursive = TRUE)
+   # unlink("decompressed_files/*.bim", recursive = TRUE)
+   # unlink("decompressed_files/*.fam", recursive = TRUE)
+   # unlink("decompressed_files/*.bed", recursive = TRUE)
+    #if exist
+    unlink("1")
+    unlink("2")
+    unlink("3")
+    unlink("4")
+    unlink("5")
+    unlink("6")
+    unlink("7")
+    unlink("8")
+    unlink("9")
+    unlink("10")
+    unlink("log")
+    
+    unlink("ADM/*.Q")
+    unlink("ADM/*.P")
+    unlink("*.Q")
+    unlink("*.P")
+    unlink("log*")
+    unlink(paste0("log", input$sliderK, ".out"))
+    unlink(input$sliderK)
+    unlink("FST/FST_output.log")
+    unlink("FST/FST_output.fst")
+    unlink("plots/PCA.png")
+    unlink("plots/FST.png")
+    unlink("plots/ADM.png")
+    unlink("plots/box_ADM.png")
+    unlink("plots/map_ADM.png")
+    
+    # Hide progress bar if needed
+    output$progress_bar_ui <- renderUI(NULL)
+  })
+
   ###########################################
   # Download report
   output$downloadReport <- downloadHandler(
@@ -921,7 +1079,10 @@ server <- function(input, output, session) {
                         ))
     }
   )
-  }
+}
+
+# Reset All button functionality
+
 
 shinyApp(ui = ui, server = server)
 
