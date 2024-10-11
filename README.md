@@ -6,5 +6,4 @@ In order to run this app on desktop R you can install the following libraries:
 run: install.packages(c("shiny", "qqman", "readr", "data.table", "ggplot2", "shinyjs", "dplyr", "tidyr", "rmarkdown", "knitr", "ggforce", "mapplots", "maps"))
  
 The Reference .bed file for : BPGA-a-Shiny-app-to-perform-Basic-Population-Genetic-Analysis
-        
-can be downloaded from https://doi.org/10.6084/m9.figshare.27203142.v1. Save file at "REFERENCE" folder
+The Reference .bed file for : BPGA-a-Shiny-app-to-perform-Basic-Population-Genetic-Analysis could be downloaded from https://doi.org/10.6084/m9.figshare.27203142.v1. Save file at "REFERENCE" folder
