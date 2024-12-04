@@ -1,0 +1,30 @@
+---
+title: "Basic Population Genetic Analysis: Analysis Report"
+date: "`r Sys.Date()`"
+output: html_document
+params:
+  pca_plot: NULL
+  admixture_plot: NULL
+  box_ADM: NULL  
+  map_ADM: NULL
+  manhattan_plot: NULL
+---
+
+# Analysis Summary
+This report provides a visual summary of the genetic analysis performed, showcasing key insights through PCA, ADMIXTURE, and FST plots. For additional details or questions, please refer to the accompanying data and methods documentation.
+
+## Resume plots
+```{r, echo=FALSE, fig.cap="<b>Principal Component Analysis (PCA)</b> providing a visualization of genetic variation between populations or samples. The plot below represents the first two principal components."}
+knitr::include_graphics(params$pca_plot)
+## Admixture Plot
+```{r, echo=FALSE, fig.cap="<b>Admixture plot</b> illustrating the ancestry proportions of individuals across populations. Each bar represents an individual, and the colors indicate the estimated ancestry components."}
+knitr::include_graphics(params$admixture_plot)
+## Admixture boxplot
+```{r, echo=FALSE, fig.cap="<b>Boxplot</b> summarizing the distribution of ancestry proportions for each population."}
+knitr::include_graphics(params$box_ADM)
+## Admixture mapplot
+```{r, echo=FALSE, fig.cap="<b>Map plot</b> showing the geographic distribution of ancestry proportions across populations. Pie charts represent ancestry components at each population location."}
+knitr::include_graphics(params$map_ADM)
+## FST Plot
+```{r, echo=FALSE, fig.cap="<b>Manhattan plot</b> displaying FST values across genomic regions, highlighting regions with significant genetic differentiation between populations."}
+knitr::include_graphics(params$manhattan_plot)
