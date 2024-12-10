@@ -6,3 +6,17 @@ In order to run this app on desktop R you can install the following libraries:
 run: install.packages(c("shiny", "qqman", "readr", "data.table", "ggplot2", "shinyjs", "dplyr", "tidyr", "rmarkdown", "knitr", "ggforce", "mapplots", "maps"))
  
 The Reference .bed file for : BPGA-a-Shiny-app-to-perform-Basic-Population-Genetic-Analysis could be downloaded from https://doi.org/10.6084/m9.figshare.27203142.v1. Save file at "REFERENCE" folder
+
+References:
+Alexander, D. H., Novembre, J. & Lange, K. Fast model-based estimation of ancestry in unrelated individuals. Genome Res 19, 1655–1664 (2009).
+Auton, A. et al. A global reference for human genetic variation. Nature 526, 68–74 (2015).
+Bergström, A. et al. Insights into human genetic variation and population history from 929 diverse genomes. Science 367, (2020).
+Purcell, S. et al. PLINK: A Tool Set for Whole-Genome Association and Population-Based Linkage Analyses. The American Journal of Human Genetics 81, 559–575 (2007).
+Yang, J., Lee, S. H., Goddard, M. E. & Visscher, P. M. GCTA: A Tool for Genome-wide Complex Trait Analysis. Am J Hum Genetics 88, 76–82 (2011).
+
+Note: folder "www" app dependencies for iOS users. 
+Other operating systems:
+Download pages:
+http://dalexander.github.io/admixture/download.html
+https://www.cog-genomics.org/plink2/
+https://yanglab.westlake.edu.cn/software/gcta/#Download
