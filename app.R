@@ -482,7 +482,7 @@ server <- function(input, output, session) {
       })
 
 ####################################################################################################  
-#################### Executar PLINK quan es fa clic al botó ######### PCA ###################
+############################################# PCA ##################################################
       observeEvent(input$run_plink, {
         req(processed_file_path())  # Assegurar que el fitxer es va processar
         req(input$pop1)  # Assegurar que hi ha alguna superpoblació seleccionada
@@ -632,8 +632,7 @@ server <- function(input, output, session) {
         print(Np)
         # Run ADMIXTURE for the selected K value
         # Ensure log file has a specific name
-        log_file_name <- paste0("log_", i, ".out")  # Specify the name for the log file
-        
+
         for (i in 1:input$sliderK) {
           system(paste("www/admixture --cv", paste0("-j",Np," ",admx_files,"/input_admx.bed"), i, "| tee log", i, ".out")) 
       

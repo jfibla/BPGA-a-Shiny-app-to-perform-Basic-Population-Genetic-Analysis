@@ -12,6 +12,7 @@ Alexander, D. H., Novembre, J. & Lange, K. Fast model-based estimation of ancest
 Auton, A. et al. A global reference for human genetic variation. Nature 526, 68–74 (2015).
 Bergström, A. et al. Insights into human genetic variation and population history from 929 diverse genomes. Science 367, (2020).
 Purcell, S. et al. PLINK: A Tool Set for Whole-Genome Association and Population-Based Linkage Analyses. The American Journal of Human Genetics 81, 559–575 (2007).
+Turner, (2018). qqman: an R package for visualizing GWAS results using Q-Q and manhattan plots. Journal of Open Source Software, 3(25), 731, https://doi.org/10.21105/joss.00731.
 Yang, J., Lee, S. H., Goddard, M. E. & Visscher, P. M. GCTA: A Tool for Genome-wide Complex Trait Analysis. Am J Hum Genetics 88, 76–82 (2011).
 
 Note: folder "www" app dependencies for iOS users. 
