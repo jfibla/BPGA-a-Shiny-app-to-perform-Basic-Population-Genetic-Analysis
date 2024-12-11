@@ -1,4 +1,5 @@
 # BPGA-a-Shiny-app-to-perform-Basic-Population-Genetic-Analysis
+#~/bpga_ngroc/app.R
 
 
 library(shiny)
@@ -24,6 +25,7 @@ conflicts_prefer(
 # Increase max upload size to 500MB
 options(shiny.maxRequestSize = 500 * 1024^2)
 
+
 ui <- fluidPage(
   useShinyjs(),  # Initialize shinyjs
   titlePanel("Basic Population Genetic Analysis - (BPGA)"),
@@ -31,10 +33,9 @@ ui <- fluidPage(
     sidebarPanel(
       # to generate user folder
       actionButton("start_analysis", "Start analisis"),
-      actionButton("clear_folders", "Clear Subfolder contents"),
-    
+      actionButton("reload_button", "Reload session"),
     #  h4("Main folders:"),
-    #  verbatimTextOutput("folder_path"),
+      verbatimTextOutput("folder_path"),
     #  h4("Subfolders:"),
     #  verbatimTextOutput("subfolder_paths"),
     #  
@@ -406,15 +407,17 @@ server <- function(input, output, session) {
         decompressed_file_path <- paste0(file.path(folder_path, "decompressed_files/INPUT"))
         processed_file_path(decompressed_file_path)
         bfile_path <- processed_file_path()
-        print(bfile_path)
+       # print(bfile_path)
         
         merge_file_path <- paste0(file.path(folder_path, "merged"))
-        
-        
+
         # Initialize progress bar
         progress <- shiny::Progress$new()
         progress$set(message = "Merging files...", value = 0)
-        on.exit(progress$close())  # Ensure progress bar closes on exit
+        on.exit({
+          progress$close()  # Ensure progress bar is closed at the end of processing
+        }, add = TRUE)
+       # on.exit(progress$close())  # Ensure progress bar closes on exit
         
         # Function to update progress
         update_progress <- function(amount) {
@@ -482,7 +485,7 @@ server <- function(input, output, session) {
       })
 
 ####################################################################################################  
-############################################# PCA ##################################################
+#################### Executar PLINK quan es fa clic al botó ######### PCA ###################
       observeEvent(input$run_plink, {
         req(processed_file_path())  # Assegurar que el fitxer es va processar
         req(input$pop1)  # Assegurar que hi ha alguna superpoblació seleccionada
@@ -490,7 +493,10 @@ server <- function(input, output, session) {
         # Inicialitzar el bar de progrés
         progress <- shiny::Progress$new()
         progress$set(message = "Running PCA by PLINK...", value = 0)
-        on.exit(progress$close())  # Assegurar que es tanca el bar
+       # on.exit(progress$close())  # Assegurar que es tanca el bar
+        on.exit({
+          progress$close()  # Ensure progress bar is closed at the end of processing
+        }, add = TRUE)
         
         # Funció per actualitzar el bar de progrés
         update_progress <- function(amount) {
@@ -609,7 +615,10 @@ server <- function(input, output, session) {
         # Initialize progress bar
         progress <- shiny::Progress$new()
         progress$set(message = "Running ADMIXTURE analysis. This may take a while......", value = 0)
-        on.exit(progress$close())  # Ensure progress bar closes on exit
+       # on.exit(progress$close())  # Ensure progress bar closes on exit
+        on.exit({
+          progress$close()  # Ensure progress bar is closed at the end of processing
+        }, add = TRUE)
         
         # Function to update progress
         update_progress <- function(amount) {
@@ -632,7 +641,8 @@ server <- function(input, output, session) {
         print(Np)
         # Run ADMIXTURE for the selected K value
         # Ensure log file has a specific name
-
+        log_file_name <- paste0("log_", i, ".out")  # Specify the name for the log file
+        
         for (i in 1:input$sliderK) {
           system(paste("www/admixture --cv", paste0("-j",Np," ",admx_files,"/input_admx.bed"), i, "| tee log", i, ".out")) 
       
@@ -924,6 +934,15 @@ server <- function(input, output, session) {
       # Run GCTA Fst test 
       observeEvent(input$run_fst, {
         req(input$run_plink)  # Ensure PLINK is run first
+        
+        # Initialize progress bar
+        progress <- shiny::Progress$new()
+        progress$set(message = "Running FST analysis", value = 0)
+        # on.exit(progress$close())  # Ensure progress bar closes on exit
+        on.exit({
+          progress$close()  # Ensure progress bar is closed at the end of processing
+        }, add = TRUE)
+        
         pca_files <- paste0(file.path(folder_path, "pca"))
         b_files <- paste0(file.path(folder_path, "pca/step3"))
         fst_files <- paste0(file.path(folder_path, "fst"))
@@ -1058,7 +1077,9 @@ server <- function(input, output, session) {
       })
       
       
-      
+      observeEvent(input$reload_button, {
+        session$reload()
+      })
   }) # end
 
   ###########################################
