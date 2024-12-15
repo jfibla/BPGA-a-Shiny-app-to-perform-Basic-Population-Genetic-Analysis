@@ -27,72 +27,125 @@ options(shiny.maxRequestSize = 500 * 1024^2)
 
 
 ui <- fluidPage(
+  #suppress warnning message at console                                         <<<<<<<<<<<<<<<<<<<<<<<
+  tags$head(
+    tags$style(
+      HTML("
+        body {
+          background-image: url('fons.jpg');
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-attachment: fixed;
+        }
+      ")
+    )
+  ),
+  tags$style(type="text/css",
+             ".shiny-output-error { visibility: hidden; }",
+             ".shiny-output-error:before { visibility: hidden; }"
+  ),
   useShinyjs(),  # Initialize shinyjs
   titlePanel("Basic Population Genetic Analysis - (BPGA)"),
   sidebarLayout(
     sidebarPanel(
+      conditionalPanel("output.panel_visible === false",  #>>>>> cond1
+                       ########################## Text explanation project
+                       absolutePanel(id = "Text explanation", class = "panel panel-default", fixed = F,
+                                     draggable = T, top = 100, left = 40, right =40, bottom = "auto",
+                                     width = "auto", height ="auto",
+                                     style = "background-color: #E8E8E8;
+                         opacity: 0.85;
+                         z-index: 1000;
+                         padding: 20px 20px 20px 20px;
+                         margin: auto;
+                         border-radius: 4px,
+                         box-shadow: 0 0 10px rgba(0,0,0,0.2);
+                         padding-bottom: 2mm;
+                         padding-top: 1mm;",       
+                                     h3("Project description"),
+                                     fluidRow(column(11, p(style="text-align: justify;","This Shiny app provides an interactive platform for visualizing population genetic structure. Users can upload their own datasets or 
+                                                           use example files to explore population relationships, genetic diversity, and ancestral components. The app dynamically reads PLINK binary files and integrates them with worldwide 
+                                                           reference populations from the 1000 Genomes Project (1000G) and the Human Genome Diversity Project (HGDP), enabling basic population analyses such as Principal Component Analysis (PCA), 
+                                                           ADMIXTURE, and FST analyses.")),
+                                              column(11, p(style="text-align: justify;","Designed for both researchers and students in population genetics, the app offers a user-friendly interface for exploring genetic 
+                                                           structure through multiple methods. It facilitates interactive data exploration and produces publication-ready plots.")),
+                                              column(11,strong("Click on "), 
+                                                     actionButton("start_analysis", "Start analysis"),
+                                                     strong("button and enjoi"))
+                                                     #actionButton("reload_button", "Reload session"))
+))
+), #>>>>> /cond1
+
+#tags$a(href="https://github.com/jfibla/BPGA-a-Shiny-app-to-perform-Basic-Population-Genetic-Analysis.git", 
+#       h5( "Code available")),
+                                     
       # to generate user folder
-      actionButton("start_analysis", "Start analisis"),
+   #   actionButton("start_analysis", "Start analysis"),
       actionButton("reload_button", "Reload session"),
     #  h4("Main folders:"),
       verbatimTextOutput("folder_path"),
-    #  h4("Subfolders:"),
-    #  verbatimTextOutput("subfolder_paths"),
-    #  
-    # textInput("folder", "Enter Subfolder Path:", value = ""),
-    # actionButton("show_content", "Show Folder Content"),
-    # verbatimTextOutput("folder_content"),
-    
+conditionalPanel(condition = "output.panel_visible === true",     #>>>>> cond2
     selectInput("files", "Select input file:",
                   c("Example single pop" = "exp1","Example multi pop" = "exp2",
                     "User file" = "usr")),
-      conditionalPanel(
-        condition = "input.files == 'usr'",
+conditionalPanel(condition = "input.files == 'usr'",             #>>>>> cond3
       fileInput("upload_file", "Load user population data (compressed .zip or .gz)", 
                 accept = c(".zip", ".gz")),
       textInput("popID", "Assign population identifier (use a three-letter code like 'USR')", "USR"),
       textInput("lat", "Assign latitude"),
       textInput("lon", "Assign longitude")
-      ),
-      h4("Process input File"),
+      ),                                                         #>>>>> /cond3
+      h3("Process input File"),
+tags$hr(style="border-color: grey;"),
+
       radioButtons("selector", "Select option:", 
               choices = list("Only loaded population" = "usr","Merge with Woldwide populations" = "wwp")),
+conditionalPanel(condition = "input.selector == 'usr'",    #>>>>> cond3.1  
       actionButton("process_file", "Decompress file"),
-      conditionalPanel(
-         condition = "input.selector == 'wwp'",
-      actionButton("run_merge", "Merge files")
-      ),
-      h4("Perform population analysis"),
+),                                                         #>>>>> /cond3.1
+conditionalPanel(condition = "input.selector == 'wwp'",           #>>>>> cond4
+      actionButton("run_merge", "Decompress and merge files")
+      ),                                                          #>>>>> /cond4
+      h3("Perform population analysis"),
       uiOutput("pop1_select"),  # Dynamic SelectInput for POP1
       shinyjs::hidden(actionButton("select_all_pop1", "Select all")),
       tags$hr(style="border-color: grey;"),
  
       h4("PCA analysis"),
-      actionButton("run_plink", "Run PCA analysis"),
-      h4("Admixture analysis"),
-      sliderInput("sliderK", "Set K values:", min = 1, max = 10, value = 1),
-      sliderInput("sliderM", "Set MAF:", min = 0.05, max = 0.50, value = 0.05, step = 0.05),
-      
-      actionButton("run_admix", "Run ADMIXTURE"),
-      h4("Decoration plots"),
-      radioButtons("popcolor", "Colored:", 
-                   choices = list("Superpopulation" = "POP1", "Subpopulation" = "POP2")),
-      sliderInput("sliderR", "Set Pie radius:", min = 0, max = 100, value = 4, step = 1),
-      sliderInput("sliderE", "Expand map:", min = 0, max = 2, value = 0.2, step = 0.05),
+      sliderInput("sliderM1", "Set MAF for prunning:", min = 0.05, max = 0.50, value = 0.05, step = 0.05),
+      actionButton("run_pca", "Run PCA analysis"),
+verbatimTextOutput("log_output"),
+tags$hr(style="border-color: grey;"),
 
-      uiOutput("sorter"),
-      #selectInput("sorter", "Sort admixture plot:",
-      #                 c("By first component" = "V1",
-      #                   "By second component" = "V2")),
-      tags$hr(style="border-color: grey;"),
-      h4("Compare two populations"),
-      h4("FST analysis"),
+#conditionalPanel(condition = "output.run_pca === true",           #>>>>> cond5
+      h4("Admixture analysis"),
+      sliderInput("sliderM2", "Set MAF:", min = 0.05, max = 0.50, value = 0.05, step = 0.05),
+verbatimTextOutput("maf_output"),  
+sliderInput("sliderK", "Set K values:", min = 1, max = 10, value = 1),
+
+      actionButton("run_admix", "Run ADMIXTURE"),
+verbatimTextOutput("cvErrors"),
+tags$hr(style="border-color: grey;"),
+      h4("FST analysis: compare two populations"),
+ #     h4("FST analysis"),
       uiOutput("pop2_checkbox"),  # Dynamic Checkbox for POP2
       shinyjs::hidden(actionButton("select_all_pop2", "Remove selected")),
       actionButton("run_fst", "Run FST analysis"),
-      
+verbatimTextOutput("max_fst_output"),  # Output for displaying the max FST rowtags$hr(style="border-color: grey;"),
+h4("Decoration plots"),
+radioButtons("popcolor", "Colored:", 
+             choices = list("Superpopulation" = "POP1", "Subpopulation" = "POP2")),
+sliderInput("sliderR", "Set Pie radius:", min = 0, max = 100, value = 4, step = 1),
+sliderInput("sliderE", "Expand map:", min = 0, max = 2, value = 0.2, step = 0.05),
+#       ),                                                               #>>>>> /cond5
+uiOutput("sorter"),
+#selectInput("sorter", "Sort admixture boxplot:",
+#                 c("By first component" = "V1",
+#                   "By second component" = "V2")),
+tags$hr(style="border-color: grey;"),
       h4("Report"),
       downloadButton("downloadReport", "Download Report"),
+    )                                                             #>>>>> /cond2
     ),
 
 ###################################################################### 
@@ -105,6 +158,7 @@ mainPanel(
       plotOutput("box_plot"), 
       plotOutput("map_plot", height = "700px"),
       plotOutput("manhattan_plot")
+      
     )
   )
 )
@@ -113,6 +167,28 @@ mainPanel(
 ################################################################################  
 
 server <- function(input, output, session) {
+  # value of slider M as min slider M1
+  observeEvent(input$sliderM1, {
+    updateSliderInput(session, "sliderM2", min = input$sliderM1)
+  })
+  
+  # Reactive value to track PLINK completion
+ 
+  
+  # Reactive value to track button state
+  panel_visible <- reactiveVal(FALSE)
+  
+  observeEvent(input$start_analysis, {
+    # Toggle the value of the panel visibility
+    panel_visible(!panel_visible())
+  })
+  
+  # Send the value of panel_visible to the client
+  output$panel_visible <- reactive({
+    panel_visible()
+  })
+  outputOptions(output, "panel_visible", suspendWhenHidden = FALSE)
+  
   
   observeEvent(input$show_content, {
     req(input$folder) # Ensure the folder path is provided
@@ -137,10 +213,9 @@ server <- function(input, output, session) {
       paste("Content of", folder_path, ":\n", paste(folder_content, collapse = "\n"))
     })
   })
-  
   processed_file_path <- reactiveVal(NULL)  # Store processed file path
   # Disable the PCA, ADMIXTURE, and FST buttons by default
-  shinyjs::disable("run_plink")
+  shinyjs::disable("run_pca")
   shinyjs::disable("run_admix")
   shinyjs::disable("run_fst")
   
@@ -191,7 +266,7 @@ server <- function(input, output, session) {
         }, add = TRUE)
         
         if (input$selector == "usr") {
-          shinyjs::enable("run_plink")
+          shinyjs::enable("run_pca")
         }
         
         if (input$files == "exp1" || input$files == "exp2"){                   ############### if the example file is selected
@@ -238,7 +313,7 @@ server <- function(input, output, session) {
             # UI dinàmic per a la selecció de POP1
             output$pop1_select <- renderUI({
               df2 <- df2_reactive()
-              selectInput("pop1", "Select Superpopulation: (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
+              selectInput("pop1", "Select Population(s): (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
             })
             
             # UI dinàmic per als checkboxes de POP2 basats en el POP1 seleccionat
@@ -286,7 +361,7 @@ server <- function(input, output, session) {
             # UI dinàmic per a la selecció de POP1
             output$pop1_select <- renderUI({
               df2 <- df2_reactive()
-              selectInput("pop1", "Select Superpopulation: (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
+              selectInput("pop1", "Select Population(s): (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
             })
             
             # UI dinàmic per als checkboxes de POP2 basats en el POP1 seleccionat
@@ -384,7 +459,7 @@ server <- function(input, output, session) {
             # UI dinàmic per a la selecció de POP1
             output$pop1_select <- renderUI({
               df2 <- df2_reactive()
-              selectInput("pop1", "Select Superpopulation: (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
+              selectInput("pop1", "Select Population(s): (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
             })
             
             # UI dinàmic per als checkboxes de POP2 basats en el POP1 seleccionat
@@ -403,6 +478,223 @@ server <- function(input, output, session) {
 #####################################################################################  
       # Function to merge files
       observeEvent(input$run_merge, {
+        # Ensure only one progress object is created at the start
+        progress <- shiny::Progress$new()
+        progress$set(message = "Processing file...", value = 0)
+        on.exit({
+          progress$close()  # Ensure progress bar is closed at the end of processing
+        }, add = TRUE)
+        
+        if (input$selector == "usr") {
+          shinyjs::enable("run_pca")
+        }
+        
+        if (input$files == "exp1" || input$files == "exp2"){                   ############### if the example file is selected
+          # go to folder with the example file
+          if (input$files == "exp1"){
+            ex_file_path <- "example/example_single.zip"  # load example_single files from "example" folder
+            file_ext <- tools::file_ext(ex_file_path) # extract file extension
+            base_name <- "example" # extract base name
+          } else {
+            ex_file_path <- "example/example_multi.zip"  # load example_multi files from "example" folder
+            file_ext <- tools::file_ext(ex_file_path)
+            base_name <- "example"
+          }
+          if(input$selector == "wwp") {                 ####### if example file is merged with WWW
+            unzip(ex_file_path, exdir = file.path(folder_path, "decompressed_files")) #>>>>>> send to "decompressed_files" folder
+            decompressed_file_path <- file.path(folder_path, "decompressed_files", base_name)
+            # Store the processed file path
+            processed_file_path(decompressed_file_path)
+            
+            # rename files as INPUT mantenint l'extensió original
+            file_extension <- tools::file_ext(decompressed_file_path)  # Obtenim l'extensió
+            new_name <- file.path(folder_path, "decompressed_files", paste0("INPUT", file_extension))
+            
+            # Canvia el nom del fitxer descomprimit (amb totes les extensions relacionades)
+            file.rename(paste0(decompressed_file_path, ".bed"), paste0(new_name, ".bed"))
+            file.rename(paste0(decompressed_file_path, ".fam"), paste0(new_name, ".fam"))
+            file.rename(paste0(decompressed_file_path, ".bim"), paste0(new_name, ".bim")) 
+            # Retorna el nou camí del fitxer processat
+            processed_file_path <- new_name
+            
+            # recover codes from first column
+            df2_reactive <- reactive({
+              fam <- fread(paste0(file.path(folder_path),"/decompressed_files/INPUT.fam"), header = F)
+              fam.1 <- fam[, 1:2]
+              colnames(fam.1) = c("IDI", "IDII")
+              fam.2 <- fam.1[, 1]
+              colnames(fam.2) <- "V1"
+              fam2 <- fam.2 %>%
+                separate(V1, into = c("POP1", "POP2"), sep = "_")
+              df2 <- as.data.frame(cbind(fam2,fam.2))
+              return(df2)
+            })
+            
+            # UI dinàmic per a la selecció de POP1
+            output$pop1_select <- renderUI({
+              df2 <- df2_reactive()
+              selectInput("pop1", "Select Population(s): (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
+            })
+            
+            # UI dinàmic per als checkboxes de POP2 basats en el POP1 seleccionat
+            output$pop2_checkbox <- renderUI({
+              req(input$pop1)  # Assegura que POP1 està seleccionat
+              df2 <- df2_reactive()
+              pop2_choices <- df2[df2$POP1 == input$pop1, "POP2"]
+              selectInput("pop2", "Select a pair of Subpopulations: (FST analysis)", choices = unique(pop2_choices), multiple = TRUE)
+            })
+            
+            # Update status to indicate file processed successfully
+            output$status <- renderText("File processed successfully.")
+            
+          } else {                                  ####### if example file is processed alone
+            
+            unzip(ex_file_path, exdir = file.path(folder_path, "merged"))  #>>>>>>> send to "temporal" folder
+            temporal_file_path <- file.path(folder_path, "merged", base_name)
+            processed_file_path(temporal_file_path)
+            
+            # rename file as "MERGED" mantenint l'extensió original
+            file_extension <- tools::file_ext(temporal_file_path)  # Obtenim l'extensió
+            new_name <- file.path(folder_path, "merged", paste0("MERGED", file_extension))
+            
+            # Canvia el nom del fitxer descomprimit (amb totes les extensions relacionades)
+            file.rename(paste0(temporal_file_path, ".bed"), paste0(new_name, ".bed"))
+            file.rename(paste0(temporal_file_path, ".fam"), paste0(new_name, ".fam"))
+            file.rename(paste0(temporal_file_path, ".bim"), paste0(new_name, ".bim"))
+            
+            # Retorna el nou camí del fitxer processat
+            processed_file_path <- new_name
+            
+            # recover codes from first column
+            df2_reactive <- reactive({
+              fam <- fread(paste0(file.path(folder_path),"/merged/MERGED.fam"), header = F)
+              fam.1 <- fam[, 1:2]
+              colnames(fam.1) = c("IDI", "IDII")
+              fam.2 <- fam.1[, 1]
+              colnames(fam.2) <- "V1"
+              fam2 <- fam.2 %>%
+                separate(V1, into = c("POP1", "POP2"), sep = "_")
+              df2 <- as.data.frame(cbind(fam2,fam.2))
+              return(df2)
+            })
+            
+            # UI dinàmic per a la selecció de POP1
+            output$pop1_select <- renderUI({
+              df2 <- df2_reactive()
+              selectInput("pop1", "Select Population(s): (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
+            })
+            
+            # UI dinàmic per als checkboxes de POP2 basats en el POP1 seleccionat
+            output$pop2_checkbox <- renderUI({
+              req(input$pop1)  # Assegura que POP1 està seleccionat
+              df2 <- df2_reactive()
+              pop2_choices <- df2[df2$POP1 == input$pop1, "POP2"]
+              selectInput("pop2", "Select a pair of Subpopulations: (FST analysis)", choices = unique(pop2_choices), multiple = TRUE)
+            })
+          }
+          # File processed successfully
+          output$status <- renderText("File processed successfully.")
+          #    progress$inc(1)  # Increment progress
+          
+        } else {                                 ################ selection of file loaded by the user
+          req(input$upload_file)
+          
+          usr_file_path <- input$upload_file$datapath
+          file_ext <- tools::file_ext(usr_file_path)
+          
+          base_name <- NULL
+          
+          if(input$selector == "wwp") {             ########### if loaded file must be merged with WWW 
+            
+            if (file_ext == "zip") {
+              unzip(usr_file_path, exdir = file.path(folder_path, "decompressed_files")) #>>>>>> send to "decompressed_files" folder
+              base_name <- tools::file_path_sans_ext(input$upload_file$name)
+            } else if (file_ext == "gz") {
+              base_name <- tools::file_path_sans_ext(basename(usr_file_path))
+              system(paste("gunzip", usr_file_path))
+            } else {
+              stop("Unsupported file type.")
+            }
+            decompressed_file_path <- paste0(file.path(folder_path, "decompressed_files", base_name))
+            processed_file_path(decompressed_file_path)
+            print(base_name)
+            # to assign new code to .fam file
+            user.fam <- fread(paste0(decompressed_file_path,".fam"), header = F)
+            colnames(user.fam) <- c("V1","V2","V3","V4","V5","V6")
+            user.id <- paste0(input$popID,"_",input$popID)
+            user.fam$V1 <- user.id
+            write.table(user.fam, paste0(decompressed_file_path,".fam"), quote = FALSE, row.names = FALSE, col.names = FALSE)
+            
+            # Renomena amb el nom "INPUT" mantenint l'extensió original
+            file_extension <- tools::file_ext(decompressed_file_path)  # Obtenim l'extensió
+            new_name <- file.path(folder_path, "decompressed_files", paste0("INPUT", file_extension))
+            print(new_name)
+            # Canvia el nom del fitxer descomprimit (amb totes les extensions relacionades)
+            file.rename(paste0(decompressed_file_path, ".bed"), paste0(new_name, ".bed"))
+            file.rename(paste0(decompressed_file_path, ".fam"), paste0(new_name, ".fam"))
+            file.rename(paste0(decompressed_file_path, ".bim"), paste0(new_name, ".bim"))
+            
+          } else {                                ############  if loaded file is processed alone
+            if (file_ext == "zip") {
+              unzip(usr_file_path, exdir = file.path(folder_path, "merged"))  #>>>>>> send to "merged" folder
+              base_name <- tools::file_path_sans_ext(input$upload_file$name)
+            } else if (file_ext == "gz") {
+              base_name <- tools::file_path_sans_ext(basename(usr_file_path))
+              system(paste("gunzip", usr_file_path))
+            } else {
+              stop("Unsupported file type.")
+            }
+            merged_file_path <- paste0(file.path(folder_path, "merged", base_name))
+            processed_file_path(merged_file_path)
+            
+            # to assign new code to .fam file
+            user.fam <- fread(paste0(merged_file_path,".fam"), header = F)
+            colnames(user.fam) <- c("V1","V2","V3","V4","V5","V6")
+            user.id <- paste0(input$popID,"_",input$popID)
+            user.fam$V1 <- user.id
+            write.table(user.fam, paste0(merged_file_path,".fam"), quote = FALSE, row.names = FALSE, col.names = FALSE)
+            
+            # Defineix el nou camí amb el nom "MERGED" mantenint l'extensió original
+            file_extension <- tools::file_ext(merged_file_path)  # Obtenim l'extensió
+            new_name <- file.path(folder_path, "merged", paste0("MERGED", file_extension))
+            
+            # Canvia el nom del fitxer descomprimit (amb totes les extensions relacionades)
+            file.rename(paste0(merged_file_path, ".bed"), paste0(new_name, ".bed"))
+            file.rename(paste0(merged_file_path, ".fam"), paste0(new_name, ".fam"))
+            file.rename(paste0(merged_file_path, ".bim"), paste0(new_name, ".bim"))
+            
+            # recover codes from first column
+            df2_reactive <- reactive({
+              fam <- fread(paste0(file.path(folder_path, "merged/MERGED.fam")), header = F)
+              fam.1 <- fam[, 1:2]
+              colnames(fam.1) = c("IDI", "IDII")
+              fam.2 <- fam.1[, 1]
+              colnames(fam.2) <- "V1"
+              fam2 <- fam.2 %>%
+                separate(V1, into = c("POP1", "POP2"), sep = "_")
+              df2 <- as.data.frame(cbind(fam2,fam.2))
+              return(df2)
+            })
+            
+            # UI dinàmic per a la selecció de POP1
+            output$pop1_select <- renderUI({
+              df2 <- df2_reactive()
+              selectInput("pop1", "Select Population(s): (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
+            })
+            
+            # UI dinàmic per als checkboxes de POP2 basats en el POP1 seleccionat
+            output$pop2_checkbox <- renderUI({
+              req(input$pop1)  # Assegura que POP1 està seleccionat
+              df2 <- df2_reactive()
+              pop2_choices <- df2[df2$POP1 == input$pop1, "POP2"]
+              selectInput("pop2", "Select a pair of Subpopulations: (FST analysis)", choices = unique(pop2_choices), multiple = TRUE)
+            })
+          }
+          # Final step - Update status and progress bar
+          output$status <- renderText("File processed successfully.")
+          progress$inc(1)  # Ensure progress is fully completed 
+        }
+##################################### Merge step ##################################  
         # Obtain procesed file
         decompressed_file_path <- paste0(file.path(folder_path, "decompressed_files/INPUT"))
         processed_file_path(decompressed_file_path)
@@ -469,7 +761,7 @@ server <- function(input, output, session) {
         # UI dinàmic per a la selecció de POP1
         output$pop1_select <- renderUI({
           df2 <- df2_reactive()
-          selectInput("pop1", "Select Superpopulation: (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
+          selectInput("pop1", "Select Population(s): (PCA & Admixture analysis)", choices = unique(df2$POP1), multiple = TRUE)
         })
         
         # UI dinàmic per als checkboxes de POP2 basats en el POP1 seleccionat
@@ -480,13 +772,17 @@ server <- function(input, output, session) {
           selectInput("pop2", "Select a pair of Subpopulations: (FST analysis)", choices = unique(pop2_choices), multiple = TRUE)
           # checkboxGroupInput("pop2", "Select POP2 Groups:", choices = unique(pop2_choices))
         }) 
-        shinyjs::enable("run_plink")
+        shinyjs::enable("run_pca")
         showNotification("Files merged successfully! You can now perform PCA analyses by selecting target populations.", type = "message", duration = 10)
       })
 
-####################################################################################################  
-#################### Executar PLINK quan es fa clic al botó ######### PCA ###################
-      observeEvent(input$run_plink, {
+      #####################################################################################
+      ######################################PCA ###########################################
+      #####################################################################################
+      observeEvent(input$run_pca, {
+        # Reset PLINK status to FALSE when starting
+      #  run_pca(FALSE)
+        
         req(processed_file_path())  # Assegurar que el fitxer es va processar
         req(input$pop1)  # Assegurar que hi ha alguna superpoblació seleccionada
         
@@ -530,7 +826,7 @@ server <- function(input, output, session) {
         write.table(to_keep[, 3:4], paste0(pca_files,"/to_keep.txt"), quote = FALSE, row.names = FALSE, col.names = FALSE)
         write.table(to_keep[, 1:2], paste0(pca_files,"/to_color.txt"), quote = FALSE, row.names = FALSE, col.names = FALSE)
         
-        tryCatch({
+        plink_result <-  tryCatch({
           # Step 0: Filter the data by selected superpopulation(s) unless "Select all" is checked
           if (input$select_all_pop1=="Select all") {
             # If "Select All" is checked, skip the --keep step
@@ -542,7 +838,9 @@ server <- function(input, output, session) {
             update_progress(0.20)  # Update progress to 20%
           } 
           # Step 1: Run PLINK with MAF filter
-          system(paste0("www/plink19 --bfile  ",pca_files,"/step1 --maf 0.05 --make-bed --out  ",pca_files,"/step2"))
+          n = input$sliderM1
+          print(n)
+          system(paste0("www/plink19 --bfile  ",pca_files,"/step1 --maf ", n ," --make-bed --out  ",pca_files,"/step2"))
           update_progress(0.20)  # Update progress to 40%
           
           # Step 2: Perform linkage disequilibrium (LD) pruning
@@ -563,6 +861,47 @@ server <- function(input, output, session) {
           showNotification("PLINK analysis failed. Check the logs.", type = "error", duration = 10)
           output$status <- renderText(paste("Error:", e$message))
         })
+############################################ PCA log file
+        # Directory for temporary files
+        log_file <- file.path(pca_files, "step3.log")
+        
+        # Display PLINK output in the UI
+        output$plink_output <- renderText({
+          paste(plink_result, collapse = "\n")
+        })
+        
+        # Wait until the log file is generated
+        if (file.exists(log_file)) {
+          # Allow user to search log file dynamically
+          keyword <- "variants and"
+          lines_before <- 0
+          lines_after <- 0
+          
+          # Construct grep command
+          grep_command <- paste0(
+            "grep ",
+            ifelse(lines_before > 0, paste0("-B ", lines_before, " "), ""),
+            ifelse(lines_after > 0, paste0("-A ", lines_after, " "), ""),
+            shQuote(keyword), " ", shQuote(log_file)
+          )
+       
+          # Extract matching lines from the log file
+          log_lines <- tryCatch(
+            system(grep_command, intern = TRUE),
+            error = function(e) "No matching lines found."
+          )
+          
+          # Display the extracted lines in the UI
+          output$log_output <- renderText({
+            paste(log_lines, collapse = "\n")
+          })
+        } else {
+          output$log_output <- renderText({
+            "Log file not found. Ensure PLINK ran successfully."
+          })
+        }
+   
+        ############################################
         
         update_progress(1)  # Finalitzar el progrés
         
@@ -595,7 +934,7 @@ server <- function(input, output, session) {
             PCA <-  ggplot(PCA_results, aes(x = PC1, y = PC2, color = factor(to_color$POP2), shape = factor(to_color$POP1))) +
               geom_point(size = 3, stroke = 1.5) +
               labs(title = "PCA Plot", x = "PC1", y = "PC2") +
-              guides(color = guide_legend(title = "Subpopulation"),
+              guides(color = guide_legend(title = "Population"),
                      shape = guide_legend(title = "Superpulation")) 
           }
           plot(PCA)
@@ -605,12 +944,15 @@ server <- function(input, output, session) {
         shinyjs::enable("run_admix")
         shinyjs::enable("run_fst")
         showNotification("PCA analysis finished. You can now run ADMIXTURE or FST analysis.", type = "message", duration = 10)
-        
+        # Update the status to TRUE when done
+     #   run_pca(TRUE)
       })  
       
-      ###########################################
+      #####################################################################################
+      ############################### ADMIXTURE ###########################################
+      #####################################################################################
       observeEvent(input$run_admix, {
-        req(input$run_plink)  # Ensure PLINK is run first
+        req(input$run_pca)  # Ensure PLINK is run first
         
         # Initialize progress bar
         progress <- shiny::Progress$new()
@@ -632,31 +974,71 @@ server <- function(input, output, session) {
         pca_files <- paste0(file.path(folder_path, "pca"))
         
         # adjust MAF
-        m = input$sliderM
+        m = input$sliderM2
+        MAF_filter <-  tryCatch({
         system(paste0("www/plink19 --bfile ",pca_files,"/step3 --maf ", m, " --make-bed --out ",admx_files,"/input_admx"))  
-        update_progress(0.05 / (input$sliderM - 0.05))  # Update progress incrementally based on M
+        update_progress(0.05 / (input$sliderM2 - 0.05))  # Update progress incrementally based on M
+        })
+        ############################################ to show maf log file
+        # Directory for temporary files
+        log_file <- file.path(admx_files, "input_admx.log")
+        
+        # Display PLINK output in the UI
+        output$maf_output <- renderText({
+          paste(MAF_filter, collapse = "\n")
+        })
+        
+        # Wait until the log file is generated
+        if (file.exists(log_file)) {
+          # Allow user to search log file dynamically
+          keyword <- "variants and"
+          lines_before <- 0
+          lines_after <- 0
+          
+          # Construct grep command
+          grep_command <- paste0(
+            "grep ",
+            ifelse(lines_before > 0, paste0("-B ", lines_before, " "), ""),
+            ifelse(lines_after > 0, paste0("-A ", lines_after, " "), ""),
+            shQuote(keyword), " ", shQuote(log_file)
+          )
+          
+          # Extract matching lines from the log file
+          log_lines <- tryCatch(
+            system(grep_command, intern = TRUE),
+            error = function(e) "No matching lines found."
+          )
+          
+          # Display the extracted lines in the UI
+          output$maf_output <- renderText({
+            paste(log_lines, collapse = "\n")
+          })
+        } else {
+          output$maf_output <- renderText({
+            "Log file not found. Ensure PLINK ran successfully."
+          })
+        }
+        
+        ############################################
         
         # detect number of processor Np. Use Np-1 
         Np <- parallel::detectCores() - 1
         print(Np)
-        # Run ADMIXTURE for the selected K value
-        # Ensure log file has a specific name
-        log_file_name <- paste0("log_", i, ".out")  # Specify the name for the log file
         
+        # Run ADMIXTURE for the selected K value
         for (i in 1:input$sliderK) {
-          system(paste("www/admixture --cv", paste0("-j",Np," ",admx_files,"/input_admx.bed"), i, "| tee log", i, ".out")) 
-      
+          system(paste("www/admixture --cv", paste0("-j",Np," ",admx_files,"/input_admx.bed"), i, "| tee", paste0("log", i, ".out"))) 
           update_progress(1.0 / (input$sliderK - 1))  # Update progress incrementally based on K
         }
         
-        # Identify the .Q file (adjust the pattern to match your specific naming convention)
+        # Identify the .Q file and move to temporary admx folder
         main_dir <- getwd()  # Get the current working directory
         
         for (j in 1:10) {  # Loop through the specified range
           q_file_name <- paste0("input_admx.", j, ".Q")  # Construct the file name
           q_file_path <- file.path(main_dir, q_file_name)  # Create the full path for the source file
           destination_path <- file.path(admx_files, q_file_name)  # Create the destination path
-          
+
           # Move the .Q file if it exists
           if (file.exists(q_file_path)) {  
             success <- file.rename(q_file_path, destination_path)  # Attempt to rename (move) the file
@@ -669,7 +1051,55 @@ server <- function(input, output, session) {
             cat(paste(".Q file does not exist at:", q_file_path, "\n"))  # File not found message
           }
         }
-        # remove undesired files
+        
+        # Identify the log file and move to temporary admx folder
+        for (t in 1:10) {  # Loop through the specified range
+          log_file_name <- paste0("log", t, ".out")  # Construct the file name
+          log_file_path <- file.path(main_dir, log_file_name)  # Create the full path for the source file
+          destination_path <- file.path(admx_files, log_file_name)  # Create the destination path
+          
+          # Move the .Q file if it exists
+          if (file.exists(log_file_path)) {  
+            success <- file.rename(log_file_path, destination_path)  # Attempt to rename (move) the file
+            if (success) {
+              cat(paste("Moved log file to:", destination_path, "\n"))  # Success message
+            } else {
+              cat(paste("Failed to move log file from", log_file_path, "to", destination_path, "\n"))  # Failure message
+            }
+          } else {
+            cat(paste("log file does not exist at:", log_file_path, "\n"))  # File not found message
+          }
+        }
+        
+        # Initialize a list to store the log contents
+        all_logs <- list()  # Initialize a list to store logs
+        
+        # Loop through the range of K values
+        for (r in 1:input$sliderK) {
+          log_file <- paste0(admx_files, "/log", r, ".out")  # Construct the log file path
+          
+          # Check if the file exists before reading it
+          if (file.exists(log_file)) {
+            adm_log <- readLines(log_file)  # Read the log file lines
+            all_logs[[paste0("K", r)]] <- adm_log  # Store log content
+          } else {
+            warning(paste("Log file not found:", log_file))  # Warning if file not found
+          }
+        }
+        
+        # Extract lines with "CV error" from all logs
+        cv_error_lines <- unlist(lapply(all_logs, function(log) grep("CV error", log, value = TRUE)))
+       # print(cv_error_lines)
+        # Output the CV error lines to the verbatimTextOutput
+        output$cvErrors <- renderPrint({
+          if (length(cv_error_lines) > 0) {
+            cat(cv_error_lines, sep = "\n")  # Print all CV error lines
+          } else {
+            cat("No CV error lines found.")  # Message if no lines found
+          }
+        })
+
+       # remove undesired files
         unlink("1")
         unlink("2")
         unlink("3")
@@ -683,10 +1113,11 @@ server <- function(input, output, session) {
         unlink("log")
         unlink("*.P")
         unlink("log*")
+        unlink("*.out")
         
         # UI dinàmic per a la selecció del admixture component
         output$sorter <- renderUI({
-          selectInput("sorter", "Sort admixture plot by 'Ancestry component': ", choices = 1:input$sliderK, multiple = F,selected=1)
+          selectInput("sorter", "Sort admixture boxplot by 'Ancestry component': ", choices = 1:input$sliderK, multiple = F,selected=1)
         }) 
         
         # Render the ADMIXTURE plot
@@ -712,6 +1143,7 @@ server <- function(input, output, session) {
               group_by(POP1) %>%
               mutate(Index = row_number()) %>%
               ungroup() 
+            
             # Transformar el dataframe a format llarg
             data_long <- data_sorted %>%
               pivot_longer(cols = starts_with("V"), names_to = "Variable", values_to = "Value")
@@ -725,24 +1157,18 @@ server <- function(input, output, session) {
               theme(legend.position = "bottom")
             
           } else {
-            # Calculate the mean "Value" for each POP2 group and reorder POP2
             data_sorted <- data %>%
               group_by(POP2) %>%
-              mutate(mean_value = mean(V1, na.rm = TRUE)) %>%
-              ungroup() %>%
-              arrange(mean_value)  # Sort data by the mean value
+              arrange(V1, .by_group = TRUE) %>%
+              ungroup()
             
-            # Update the factor levels of POP2 based on the calculated order
-            data_sorted <- data_sorted %>%
-              mutate(POP2 = factor(POP2, levels = unique(POP2[order(mean_value)])))
-            
-            # Add an index column for each group
+            # Afegir una columna d'índex per a cada grup
             data_sorted <- data_sorted %>%
               group_by(POP2) %>%
               mutate(Index = row_number()) %>%
-              ungroup()
+              ungroup() 
             
-            # Transform the dataframe to long format
+            # Transformar el dataframe a format llarg
             data_long <- data_sorted %>%
               pivot_longer(cols = starts_with("V"), names_to = "Variable", values_to = "Value")
             
@@ -771,7 +1197,6 @@ server <- function(input, output, session) {
           ggsave(paste0(ploted_files,"/ADM.png"), plot = ADM)
 ##############################################################################
         })
-        
         output$box_plot <- renderPlot({
           # Load data
           runs <- fread(paste0(admx_files,"/input_admx.", input$sliderK, ".Q"))
@@ -930,10 +1355,12 @@ server <- function(input, output, session) {
           # }
         })
       })
-      ###########################################
+#######################################################################################
+####################################### FST ###########################################
+#######################################################################################
       # Run GCTA Fst test 
       observeEvent(input$run_fst, {
-        req(input$run_plink)  # Ensure PLINK is run first
+        req(input$run_pca)  # Ensure PLINK is run first
         
         # Initialize progress bar
         progress <- shiny::Progress$new()
@@ -978,7 +1405,17 @@ server <- function(input, output, session) {
           FST_output <- as.data.frame(FST_output)
           # Find the row with the maximum Fst value
           max_fst_row <- FST_output[which.max(FST_output$Fst), ]
+          print(max_fst_row)
           
+          
+            output$max_fst_output <- renderPrint({
+              if (nrow(max_fst_row) > 0) {
+                print(max_fst_row)  # Print the max FST row
+              } else {
+                cat("No FST data available.")  # Message if no data available
+              }
+            })
+
           # Print the SNP value of the row with the maximum Fst
           max_fst_snp <- max_fst_row$SNP
           max_fst_snp
