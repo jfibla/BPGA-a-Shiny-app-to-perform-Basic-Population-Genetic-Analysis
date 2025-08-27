@@ -1,6 +1,6 @@
 # BPGA — A Shiny App for Basic Population Genetic Analysis
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-<br>https://doi.org/10.5281/zenodo.16953021
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16953021.svg)](https://doi.org/10.5281/zenodo.16953021)
 <br>BPGA is an interactive **R/Shiny** application that lets you run core population-genetic workflows on **PLINK** datasets and explore results visually. It supports **PCA**, **FST**, and **ADMIXTURE**, can **merge user data with worldwide reference panels**, and exports publication-ready figures and an interactive Manhattan plot.
 
 ---
