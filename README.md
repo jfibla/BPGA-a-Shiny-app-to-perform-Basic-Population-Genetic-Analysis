@@ -197,6 +197,14 @@ Temporary session folders like `user_output_xxx/` (with `pca/`, `admx/`, `fst/`,
 ### RStudio / Local
 - Same requirements as above. Run with `shiny::runApp(".")`.
 
+### Hosted demo
+
+You can try an interactive instance of **BPGA** here:
+
+**http://15.188.54.171:3838/bpga_app/**
+
+This server is meant for functionality testing and demos. Performance and availability may vary depending on server load. The demo uses the app’s default upload cap (configured in the code) and includes example datasets to explore the workflow quickly.
+
 ---
 
 ## Troubleshooting
