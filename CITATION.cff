@@ -1,0 +1,9 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: Joan
+  given-names: Fibla
+orcid: https://orcid.org/0000-0002-3255-2227
+title:jfibla/BPGA-a-Shiny-app-to-perform-Basic-Population-Genetic-Analysis: BPGA.v1.0.0
+version: v1.0.0
+date-released: 2025-08-26
