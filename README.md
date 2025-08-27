@@ -54,19 +54,156 @@
 
 ## Input data & formats
 - **User input (compressed)**: `.zip` or `.gz` containing **.bed/.bim/.fam**.
-- **FAM population coding** (first column) — choose one when loading:
-  1. **`POP1_POP2` preformatted** (e.g., `EUR_CEU`)
-  2. **Single population** (“unic”) → you’ll provide one 3-letter code (e.g., `USR`) and optional **LAT/LON**
-  3. **Multiple populations** (“subpop”) → you’ll provide one 3-letter **POP1** code and a coordinate file
-
+- **FAM population coding** (first column) — choose one when loading (see examples):
+  1. **First column preformatted as `POP1_POP2`** ("pop1pop2") → you’ll provide a coordinate file
+  2. **First column describes one single population** (“unic”) → you’ll provide one 3-letter code (e.g., `USR`) and optional **LAT/LON**
+  3. **First column describes several populations** (“subpop”) → you’ll provide one 3-letter **POP1** code and a coordinate file
 - **Coordinate file (needed for mapping when using `pop1pop2` or `subpop`)**  
-  Tab-separated text with **five columns** (no header):
-  ```
-  POP1  POP2  Pop_name  LAT  LON
-  ```
+  Tab-separated text (.txt) with **five columns** (no header):
+  
+  POP1  POP2  Pop_name  LAT(POP2)  LON(POP2)
+---
+<h4>Examples of FAM file and assigned coordinate file</h4>
+
+<table>
+  <tr>
+    <td valign="top">
+      <strong>First column preformatted as <code>POP1_POP2</code></strong>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Family ID</th>
+            <th>Individual ID</th>
+            <th>Father</th>
+            <th>Mother</th>
+            <th>Sex</th>
+            <th>Phenotype</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>AFR_ASW</td><td>NA19916</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+          <tr><td>AFR_ASW</td><td>NA19703</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+          <tr><td>EUR_CEU</td><td>NA12341</td><td>0</td><td>0</td><td>2</td><td>-9</td></tr>
+          <tr><td>EUR_CEU</td><td>NA06984</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+          <tr><td>EAS_CHB</td><td>NA18532</td><td>0</td><td>0</td><td>2</td><td>-9</td></tr>
+          <tr><td>EAS_CHB</td><td>NA18561</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+        </tbody>
+      </table>
+    </td>
+    <td valign="top">
+      <strong>Assigned coordinate file (.txt)</strong>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>POP1</th>
+            <th>POP2</th>
+            <th>Pop_name</th>
+            <th>LAT</th>
+            <th>LON</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>AFR</td><td>ASW</td><td>African</td><td>-3.82</td><td>12.93</td></tr>
+          <tr><td>EAS</td><td>CHD</td><td>Chinese</td><td>40.00</td><td>115.00</td></tr>
+          <tr><td>EUR</td><td>CEU</td><td>European</td><td>51.30</td><td>11.66</td></tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td valign="top">
+      <strong>First column describes one single population</strong>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Family ID</th>
+            <th>Individual ID</th>
+            <th>Father</th>
+            <th>Mother</th>
+            <th>Sex</th>
+            <th>Phenotype</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>AFR</td><td>NA19818</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+          <tr><td>AFR</td><td>NA20346</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+          <tr><td>AFR</td><td>NA19921</td><td>0</td><td>0</td><td>2</td><td>-9</td></tr>
+          <tr><td>AFR</td><td>NA20281</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+          <tr><td>AFR</td><td>NA20301</td><td>0</td><td>0</td><td>2</td><td>-9</td></tr>
+          <tr><td>AFR</td><td>NA20294</td><td>0</td><td>0</td><td>2</td><td>-9</td></tr>
+          <tr><td>AFR</td><td>NA20357</td><td>0</td><td>0</td><td>2</td><td>-9</td></tr>
+        </tbody>
+      </table>
+    </td>
+    <td valign="top">
+      <strong>Assigned coordinate file</strong>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Instructions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>User assigned population code</td></tr>
+          <tr><td>User assigned LON, LAT coordinates</td></tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td valign="top">
+      <strong>First column describes several populations</strong>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Family ID</th>
+            <th>Individual ID</th>
+            <th>Father</th>
+            <th>Mother</th>
+            <th>Sex</th>
+            <th>Phenotype</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>ASW</td><td>NA19916</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+          <tr><td>ASW</td><td>NA19703</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+          <tr><td>CEU</td><td>NA12341</td><td>0</td><td>0</td><td>2</td><td>-9</td></tr>
+          <tr><td>CEU</td><td>NA06984</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+          <tr><td>CHB</td><td>NA18532</td><td>0</td><td>0</td><td>2</td><td>-9</td></tr>
+          <tr><td>CHB</td><td>NA18561</td><td>0</td><td>0</td><td>1</td><td>-9</td></tr>
+        </tbody>
+      </table>
+    </td>
+    <td valign="top">
+      <strong>Assigned coordinate file (.txt)</strong>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>POP1</th>
+            <th>POP2</th>
+            <th>Pop_name</th>
+            <th>LAT</th>
+            <th>LON</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>ASW</td><td>ASW</td><td>Africa_sample</td><td>9.3</td><td>19.3</td></tr>
+          <tr><td>CEU</td><td>CEU</td><td>Europe_sample</td><td>50</td><td>15</td></tr>
+          <tr><td>CHB</td><td>CHB</td><td>Asia_sample</td><td>38</td><td>83</td></tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>
+</table>
 
 ---
-
+ 
 ## Outputs
 All figures are written to the session’s temp folder (shown in the sidebar) under **`plots/`**:
 - `PCA.png`
