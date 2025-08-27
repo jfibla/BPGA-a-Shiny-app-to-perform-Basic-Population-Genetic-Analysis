@@ -106,8 +106,9 @@
           <tr><td>AFR</td><td>ASW</td><td>African</td><td>-3.82</td><td>12.93</td></tr>
           <tr><td>EAS</td><td>CHD</td><td>Chinese</td><td>40.00</td><td>115.00</td></tr>
           <tr><td>EUR</td><td>CEU</td><td>European</td><td>51.30</td><td>11.66</td></tr>
-        </tbody>
+        </tbody>  
       </table>
+    <p><em>Note:</em> Coordinates are from <code>POP2</code> populations; <code>POP1</code> coordinates are estimated as mean values of their subpopulations (<code>POP2</code>).</p>
     </td>
   </tr>
 </table>
@@ -198,6 +199,7 @@
           <tr><td>CHB</td><td>CHB</td><td>Asia_sample</td><td>38</td><td>83</td></tr>
         </tbody>
       </table>
+    <p><em>Note:</em> Coordinates are from <code>POP2</code> populations; <code>POP1</code> coordinates are estimated as mean values of all (<code>POP2</code>) populations.</p>
     </td>
   </tr>
 </table>
