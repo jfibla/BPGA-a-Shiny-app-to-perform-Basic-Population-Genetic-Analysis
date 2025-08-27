@@ -1,7 +1,7 @@
 # BPGA — A Shiny App for Basic Population Genetic Analysis
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-
-BPGA is an interactive **R/Shiny** application that lets you run core population-genetic workflows on **PLINK** datasets and explore results visually. It supports **PCA**, **FST**, and **ADMIXTURE**, can **merge user data with worldwide reference panels**, and exports publication-ready figures and an interactive Manhattan plot.
+<br>https://doi.org/10.5281/zenodo.16953021
+<br>BPGA is an interactive **R/Shiny** application that lets you run core population-genetic workflows on **PLINK** datasets and explore results visually. It supports **PCA**, **FST**, and **ADMIXTURE**, can **merge user data with worldwide reference panels**, and exports publication-ready figures and an interactive Manhattan plot.
 
 ---
 
@@ -235,7 +235,7 @@ Temporary session folders like `user_output_xxx/` (with `pca/`, `admx/`, `fst/`,
 
 ---
 
-**Note**: Save third‑party tools app dependencies at www folder. 
+**Note**: Third‑party tools **plink**, **gcta** and **admixture** are not provided. Download them from provided links and save these app dependencies at www folder. 
 - **Download pages**: 
 - **admixture** - http://dalexander.github.io/admixture/download.html
 - **plink19** - https://www.cog-genomics.org/plink2/
