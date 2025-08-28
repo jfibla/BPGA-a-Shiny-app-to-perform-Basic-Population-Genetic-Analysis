@@ -53,15 +53,25 @@
 ---
 
 ## Input data & formats
-- **User input (compressed)**: `.zip` or `.gz` containing **.bed/.bim/.fam**.
-- **FAM population coding** (first column) — choose one when loading (see examples):
-  1. **First column preformatted as `POP1_POP2`** ("pop1pop2") → you’ll provide a coordinate file
-  2. **First column describes one single population** (“unic”) → you’ll provide one 3-letter code (e.g., `USR`) and optional **LAT/LON**
-  3. **First column describes several populations** (“subpop”) → you’ll provide one 3-letter **POP1** code and a coordinate file
-- **Coordinate file (needed for mapping when using `pop1pop2` or `subpop`)**  
-  Tab-separated text (.txt) with **five columns** (no header):
-  
-  POP1  POP2  Pop_name  LAT(POP2)  LON(POP2)
+<h2>Input data &amp; formats</h2>
+<ul>
+  <li><strong>Genome builds &amp; harmonization</strong>: BPGA accepts datasets aligned to <code>hg18/GRCh36</code>, <code>hg19/GRCh37</code>, or <code>hg38/GRCh38</code>. Inputs in <code>hg18</code> or <code>hg19</code> are lifted over to <code>hg38</code> during preprocessing before any merge with the reference panel. During merging, variant alleles are harmonized to the reference panel&rsquo;s coding (including strand flips when resolvable); markers that cannot be aligned unambiguously (e.g., some A/T or C/G sites) are excluded.</li>
+
+  <li><strong>User input (compressed)</strong>: <code>.zip</code> or <code>.gz</code> containing <strong>.bed/.bim/.fam</strong>.</li>
+
+  <li><strong>FAM population coding</strong> (first column)&mdash;choose one when loading (see examples):
+    <ol>
+      <li><strong>First column preformatted as <code>POP1_POP2</code></strong> (&ldquo;pop1pop2&rdquo;) &rarr; provide a coordinate file.</li>
+      <li><strong>First column describes one single population</strong> (&ldquo;unic&rdquo;) &rarr; provide one 3-letter code (e.g., <code>USR</code>) and optional <strong>LAT/LON</strong>.</li>
+      <li><strong>First column describes several populations</strong> (&ldquo;subpop&rdquo;) &rarr; provide one 3-letter <strong>POP1</strong> code and a coordinate file.</li>
+    </ol>
+  </li>
+
+  <li><strong>Coordinate file</strong> (required when using <code>pop1pop2</code> or <code>subpop</code>): tab-separated text (<code>.txt</code>) with five columns (no header):</li>
+</ul>
+
+<pre><code>POP1  POP2  Pop_name  LAT(POP2)  LON(POP2)
+</code></pre>
 ---
 <h4>Examples of FAM file and assigned coordinate file</h4>
 
