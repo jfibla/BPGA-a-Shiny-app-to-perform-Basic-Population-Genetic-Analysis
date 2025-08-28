@@ -276,7 +276,7 @@ Expected key files and folders:
 │  ├─ admixture*       # executable (not provided, see Note)
 │  ├─ coord.txt        # reference POP coordinates for mapping
 │  ├─ fons.jpg         # background image
-│  ├─ workflow.jpg     # splash/workflow image
+│  ├─ workflow.png     # splash/workflow image
 │  └─ infograph.png    # splash image
 ```
 Temporary session folders like `user_output_xxx/` (with `pca/`, `admx/`, `fst/`, `merged/`, `plots/`, etc.) are created under your R session’s `tempdir()`.
